@@ -1,0 +1,21 @@
+{
+    "name": "trafficlight-adapter-hydrogen-web",
+    "version": "0.0.1",
+    "description": "A trafficlight adapter for hydrogen-web",
+    "main": "src/index.ts",
+    "author": "matrix.org",
+    "license": "Apache-2.0",
+    "scripts": {
+        "lint": "yarn lint:types && yarn lint:js",
+        "lint:js": "eslint --max-warnings 0 ./src/*",
+        "lint:js-fix": "eslint --fix ./src/*",
+        "lint:types": "tsc --noEmit",
+        "test:trafficlight": "tsc && node bin/index.js run",
+        "test:trafficlight:open": "tsc && node bin/index.js open",
+        "test:trafficlight:once": "tsc && node bin/index.js once"
+    },
+    "dependencies": {
+        "eslint": "^8.26.0",
+        "typescript": "^4.8.4"
+    }
+}
