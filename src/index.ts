@@ -27,7 +27,7 @@ async function start() {
     const trafficlightUrl = process.env.TRAFFICLIGHT_URL || "http://127.0.0.1:5000";
     const client = new HydrogenTrafficlightClient(trafficlightUrl);
     await addActionsToClient(client, playwrightObjects);
-    console.log("\nThe following actions were found:\n", Object.keys(client.availableActions).join(", "), "/n");
+    console.log("\nThe following actions were found:\n", client.availableActions.join(", "));
     await client.register();
     try {
         client.start();

@@ -26,25 +26,29 @@ type ActionCallback = (data?: Record<string, string>, client?: TrafficLightClien
 
 export class ActionMap {
     constructor(
-        private readonly actions: Record<string, ActionCallback> = {},
+        private readonly actionsObject: Record<string, ActionCallback> = {},
     ) {}
 
     on(action: string, callback: ActionCallback): void {
-        if (this.actions[action]) {
+        if (this.actionsObject[action]) {
             throw new Error(`Action for "${action}" is already specified!`);
         }
-        this.actions[action] = callback;
+        this.actionsObject[action] = callback;
     }
 
     off(action: string): void {
-        if (!this.actions[action]) {
+        if (!this.actionsObject[action]) {
             throw new Error(`Action "${action}" is not specified!`);
         }
-        this.actions[action] = undefined;
+        this.actionsObject[action] = undefined;
     }
 
     get(action: string): ActionCallback {
-        return this.actions[action];
+        return this.actionsObject[action];
+    }
+
+    get actions(): string[] {
+        return Object.keys(this.actionsObject);
     }
 }
 

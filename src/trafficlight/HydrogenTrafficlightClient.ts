@@ -28,6 +28,6 @@ export class HydrogenTrafficlightClient extends TrafficLightClient {
     }
 
     get availableActions(): string[] {
-        return Object.keys(this.actionMap);
+        return this.actionMap.actions;
     }
 }
