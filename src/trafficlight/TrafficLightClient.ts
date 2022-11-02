@@ -14,8 +14,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 */
 
-import fetch from 'node-fetch';
-import * as crypto from 'crypto';
+import fetch from "node-fetch";
+import * as crypto from "crypto";
 
 type PollData = {
     action: string;
@@ -53,11 +53,11 @@ export class TrafficLightClient {
 
     constructor(
         private readonly trafficLightServerURL: string,
-        private readonly actionMap: ActionMap = new ActionMap(),
+        protected readonly actionMap: ActionMap = new ActionMap(),
     ) {}
 
     protected async doRegister(type: string, data: Record<string, string>): Promise<void> {
-        console.log('Registering trafficlight client ...');
+        console.log("Registering trafficlight client ...");
         const body = JSON.stringify({
             type,
             ...data,
@@ -78,6 +78,7 @@ export class TrafficLightClient {
 
     async start() {
         let shouldExit = false;
+        let p1, p2;
         while (!shouldExit) {
             const pollResponse = await fetch(this.pollUrl);
             if (pollResponse.status !== 200) {
@@ -86,9 +87,13 @@ export class TrafficLightClient {
             const pollData = await pollResponse.json() as PollData;
             console.log(`* Trafficlight asked to execute action "${pollData.action}", `
                        +`data = ${JSON.stringify(pollData.data)}:`);
-            if (pollData.action === 'exit') {
+            if (pollData.action === "exit") {
                 shouldExit = true;
+                p2 = performance.now();
             } else {
+                if (pollData.action === "login" && !p1) {
+                    p1 = performance.now();
+                }
                 let result: Awaited<ReturnType<ActionCallback>>;
                 try {
                     const { action, data } = pollData;
@@ -101,17 +106,17 @@ export class TrafficLightClient {
                     result = await callback(data, this);
                 } catch (err) {
                     console.error(err);
-                    result = 'error';
+                    result = "error";
                 }
                 if (result) {
                     const respondResponse = await fetch(this.respondUrl, {
-                        method: 'POST',
+                        method: "POST",
                         body: JSON.stringify({
                             response: result,
                         }),
                         headers: {
-                            'Accept': 'application/json',
-                            'Content-Type': 'application/json',
+                            "Accept": "application/json",
+                            "Content-Type": "application/json",
                         },
                     });
                     if (respondResponse.status !== 200) {
@@ -120,6 +125,7 @@ export class TrafficLightClient {
                 }
             }
         }
+        console.log("Total time for login --> complete is", p2 - p1);
     }
 
     on(action: string, callback: ActionCallback): void {

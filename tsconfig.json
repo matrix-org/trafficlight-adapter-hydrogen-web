@@ -6,7 +6,7 @@
     "esModuleInterop": true,
     "module": "CommonJS",
     "moduleResolution": "Node",
-    "target": "es2016",
+    "target": "es2018",
     "noImplicitAny": false,
     "noUnusedLocals": true,
     "sourceMap": false,

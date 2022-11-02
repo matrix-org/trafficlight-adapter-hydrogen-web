@@ -22,27 +22,24 @@ import { addActionsToClient } from "./populate";
 async function start() {
     console.log("Starting Hydrogen-web trafficlight adapter");
     const playwrightObjects = await getPlaywrightPage();
-    const { browser, page, context } = playwrightObjects;
-    console.log("browser", browser.version());
-    console.log("context", context.browser().version());
+    const { page } = playwrightObjects;
 
-    const trafficlightUrl = process.env.TRAFFICLIGHT_URL || 'http://127.0.0.1:5000';
+    const trafficlightUrl = process.env.TRAFFICLIGHT_URL || "http://127.0.0.1:5000";
     const client = new HydrogenTrafficlightClient(trafficlightUrl);
     await addActionsToClient(client, playwrightObjects);
-    console.log("actions found", client["actionMap"]["actions"]);
+    console.log("\nThe following actions were found:\n", Object.keys(client.availableActions).join(", "), "/n");
     await client.register();
     try {
         client.start();
         const hydrogenURL = process.env["BASE_APP_URL"] ?? trafficlightConfig["hydrogen-instance-url"];
         // There's a disconnect that happens after you register, not sure how to properly fix this (?)
+        // so block for 3 seconds as a temp fix
         await new Promise(r => setTimeout(r, 3000));
         await page.goto(hydrogenURL);
     }
     catch (e) {
         console.error(e);
     }
-    // await context.close();
-    // await browser.close();
 }
 
 async function getPlaywrightPage() {
@@ -51,6 +48,5 @@ async function getPlaywrightPage() {
     const page = await context.newPage();
     return {browser, context, page};
 }
-
 
 start();

@@ -7,7 +7,7 @@
     "license": "Apache-2.0",
     "scripts": {
         "lint": "yarn lint:types && yarn lint:js",
-        "lint:js": "eslint --max-warnings 0 ./src/*",
+        "lint:js": "eslint . --ext .ts",
         "lint:js-fix": "eslint --fix ./src/*",
         "lint:types": "tsc --noEmit",
         "test:trafficlight": "rm -rf ./bin && tsc && node bin/src/index.js"
@@ -16,6 +16,8 @@
         "@types/glob": "^8.0.0",
         "@types/node": "^14.14.22",
         "@types/node-fetch": "^2.6.2",
+        "@typescript-eslint/eslint-plugin": "^5.42.0",
+        "@typescript-eslint/parser": "^5.42.0",
         "eslint": "^8.26.0",
         "glob": "^8.0.3",
         "node-fetch": "2.6.1",
