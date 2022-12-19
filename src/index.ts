@@ -30,12 +30,13 @@ async function start() {
     console.log("\nThe following actions were found:\n", client.availableActions.join(", "));
     await client.register();
     try {
-        client.start();
-        const hydrogenURL = process.env["BASE_APP_URL"] ?? trafficlightConfig["hydrogen-instance-url"];
+        const hydrogenURL = process.env["HYDROGEN_APP_URL"] ?? trafficlightConfig["hydrogen-instance-url"];
         // There's a disconnect that happens after you register, not sure how to properly fix this (?)
         // so block for 3 seconds as a temp fix
         await new Promise(r => setTimeout(r, 3000));
         await page.goto(hydrogenURL);
+        await client.start();
+        await playwrightObjects.browser.close();
     }
     catch (e) {
         console.error(e);
@@ -49,4 +50,12 @@ async function getPlaywrightPage() {
     return {browser, context, page};
 }
 
-start();
+async function main() {
+    // Reconnect to trafficlight after each test
+    // eslint-disable-next-line no-constant-condition
+    while (true) {
+        await start();
+    }
+}
+
+main();
