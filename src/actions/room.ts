@@ -14,7 +14,7 @@ module.exports = {
         return "room_created";
     },
 
-    "open_room": async ({ page, data }: { page: Page, data: any }) => {
+    "open-room": async ({ page, data }: { page: Page, data: any }) => {
         await page.locator(".RoomList").getByText(data["name"], { exact: true }).click();
         return "room-opened";
     },
