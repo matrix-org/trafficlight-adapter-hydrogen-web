@@ -61,12 +61,12 @@ export class TrafficLightClient {
     ) {}
 
     protected async doRegister(type: string, data: Record<string, string>): Promise<void> {
-        console.log("Registering trafficlight client ...");
+        this.uuid = crypto.randomUUID();
+        console.log(`Registering trafficlight client ${ this.uuid } ...`);
         const body = JSON.stringify({
             type,
             ...data,
         });
-        this.uuid = crypto.randomUUID();
         const target = `${this.trafficLightServerURL}/client/${this.uuid}/register`;
         const response = await fetch(target, {
             method: "POST",
@@ -74,7 +74,8 @@ export class TrafficLightClient {
             headers: { "Content-Type": "application/json" },
         });
         if (response.status != 200) {
-            throw new Error(`Unable to register client, got ${ response.status } from server`);
+           const text = await response.text();
+            throw new Error(`Unable to register client, got ${ response.status } ${ text } from server`);
         } else {
             console.log(`Registered to trafficlight as ${this.uuid}`);
         }
