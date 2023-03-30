@@ -1,0 +1,46 @@
+name: Build, linting and tests
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+
+jobs: 
+  checks:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
+      - run: yarn install
+      - run: yarn lint
+  build:
+    name: Build Docker Image
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    needs: checks
+    steps:
+       - name: Checkout clean copy
+         uses: actions/checkout@v3
+       - name: Login to registry
+         uses: docker/login-action@v1
+         with:
+           registry: ghcr.io
+           username: ${{ github.actor }}
+           password: ${{ secrets.GITHUB_TOKEN }}
+       - name: Work out labels
+         id: meta
+         uses: docker/metadata-action@v1
+         with: 
+           images: ghcr.io/${{ github.repository }}
+
+       - name: Build and push docker image
+         uses: docker/build-push-action@v2
+         with:
+           context: .
+           push: true
+           tags: ${{ steps.meta.outputs.tags }}
+           labels: ${{ steps.meta.outputs.labels }}
