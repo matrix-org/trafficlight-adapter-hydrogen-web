@@ -14,4 +14,4 @@ RUN yarn install
 # Pre-compile typescript
 RUN yarn run docker-build
 
-CMD ["xfvb-run", "yarn", "run", "docker-run"]
+CMD ["xvfb-run", "yarn", "run", "docker-run"]
