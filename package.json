@@ -10,7 +10,9 @@
         "lint:js": "eslint . --ext .ts",
         "lint:js-fix": "eslint --fix ./src/*",
         "lint:types": "tsc --noEmit",
-        "test:trafficlight": "rm -rf ./bin && tsc && node bin/src/index.js"
+        "test:trafficlight": "rm -rf ./bin && tsc && node bin/src/index.js",
+        "docker-build": "rm -rf ./bin && tsc",
+        "docker-run": "node bin/src/index.js"
     },
     "dependencies": {
         "@types/glob": "^8.0.0",

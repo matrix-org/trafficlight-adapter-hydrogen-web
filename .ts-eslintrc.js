@@ -22,6 +22,7 @@ module.exports = {
         "@typescript-eslint/no-misused-promises": 2,
         "no-unused-vars": "off",
         "@typescript-eslint/no-unused-vars": ["warn"],
+        "no-constant-condition": ["error", { "checkLoops": false }]
         "no-undef": "off",
         "semi": ["error", "always"],
         "@typescript-eslint/explicit-function-return-type": ["error"],

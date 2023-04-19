@@ -61,12 +61,12 @@ export class TrafficLightClient {
     ) {}
 
     protected async doRegister(type: string, data: Record<string, string>): Promise<void> {
-        console.log("Registering trafficlight client ...");
+        this.uuid = crypto.randomUUID();
+        console.log(`Registering trafficlight client ${ this.uuid } ...`);
         const body = JSON.stringify({
             type,
             ...data,
         });
-        this.uuid = crypto.randomUUID();
         const target = `${this.trafficLightServerURL}/client/${this.uuid}/register`;
         const response = await fetch(target, {
             method: "POST",
@@ -74,16 +74,16 @@ export class TrafficLightClient {
             headers: { "Content-Type": "application/json" },
         });
         if (response.status != 200) {
-            throw new Error(`Unable to register client, got ${ response.status } from server`);
+           const text = await response.text();
+            throw new Error(`Unable to register client, got ${ response.status } ${ text } from server`);
         } else {
             console.log(`Registered to trafficlight as ${this.uuid}`);
         }
     }
 
     async start() {
-        let shouldExit = false;
         let p1, p2;
-        while (!shouldExit) {
+        while (true) {
             const pollResponse = await fetch(this.pollUrl);
             if (pollResponse.status !== 200) {
                 throw new Error(`poll failed with ${pollResponse.status}`);
@@ -91,45 +91,44 @@ export class TrafficLightClient {
             const pollData = await pollResponse.json() as PollData;
             console.log(`* Trafficlight asked to execute action "${pollData.action}", `
                        +`data = ${JSON.stringify(pollData.data)}:`);
+            if (pollData.action === "login" && !p1) {
+                p1 = performance.now();
+            }
+            let result: Awaited<ReturnType<ActionCallback>>;
+            try {
+                const { action, data } = pollData;
+                const callback = this.actionMap.get(action);
+                if (!callback) {
+                    console.log("\tWARNING: unknown action ", action);
+                    continue;
+                }
+                console.log(`\tAction for "${action}" found in action-map  ✔`);
+                result = await callback(data, this);
+            } catch (err) {
+                console.error(err);
+                result = "error";
+            }
             if (pollData.action === "exit") {
-                shouldExit = true;
                 p2 = performance.now();
-            } else {
-                if (pollData.action === "login" && !p1) {
-                    p1 = performance.now();
-                }
-                let result: Awaited<ReturnType<ActionCallback>>;
-                try {
-                    const { action, data } = pollData;
-                    const callback = this.actionMap.get(action);
-                    if (!callback) {
-                        console.log("\tWARNING: unknown action ", action);
-                        continue;
-                    }
-                    console.log(`\tAction for "${action}" found in action-map  ✔`);
-                    result = await callback(data, this);
-                } catch (err) {
-                    console.error(err);
-                    result = "error";
-                }
-                if (result) {
-                    const respondResponse = await fetch(this.respondUrl, {
-                        method: "POST",
-                        body: JSON.stringify({
-                            response: result,
-                        }),
-                        headers: {
-                            "Accept": "application/json",
-                            "Content-Type": "application/json",
-                        },
-                    });
-                    if (respondResponse.status !== 200) {
-                        throw new Error(`respond failed with ${respondResponse.status}`);
-                    }
+                console.log("Total time for login --> complete is", p2 - p1);
+                return;
+            }
+            if (result) {
+                const respondResponse = await fetch(this.respondUrl, {
+                    method: "POST",
+                    body: JSON.stringify({
+                        response: result,
+                    }),
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                    },
+                });
+                if (respondResponse.status !== 200) {
+                    throw new Error(`respond failed with ${respondResponse.status}`);
                 }
             }
         }
-        console.log("Total time for login --> complete is", p2 - p1);
     }
 
     on(action: string, callback: ActionCallback): void {

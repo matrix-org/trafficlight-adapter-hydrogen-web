@@ -17,6 +17,7 @@
         "no-console": "off",
         "no-empty": "off",
         "no-prototype-builtins": "off",
+        "no-constant-condition": ["error", { "checkLoops": false }],
         "no-unused-vars": "warn",
         "semi": "error",
         "quotes": "error"

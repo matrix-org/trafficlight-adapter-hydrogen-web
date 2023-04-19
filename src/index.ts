@@ -21,7 +21,8 @@ import { addActionsToClient } from "./populate";
 
 async function start() {
     console.log("Starting Hydrogen-web trafficlight adapter");
-    const playwrightObjects = await getPlaywrightPage();
+    const headless = process.env.HEADLESS == "true" || false;
+    const playwrightObjects = await getPlaywrightPage(headless);
     const { page } = playwrightObjects;
 
     const trafficlightUrl = process.env.TRAFFICLIGHT_URL || "http://127.0.0.1:5000";
@@ -42,8 +43,8 @@ async function start() {
     }
 }
 
-async function getPlaywrightPage() {
-    const browser = await playwright.chromium.launch({headless: false});
+async function getPlaywrightPage(headless:boolean) {
+    const browser = await playwright.chromium.launch({headless: headless});
     const context = await browser.newContext();
     const page = await context.newPage();
     return {browser, context, page};
